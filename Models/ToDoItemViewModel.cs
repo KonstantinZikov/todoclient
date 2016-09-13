@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Web;
 
 namespace ToDoClient.Models
 {
+    [DataContract]
     public class ToDoItemViewModel
     {
         /// <summary>
@@ -13,6 +15,7 @@ namespace ToDoClient.Models
         /// <value>
         /// To do identifier.
         /// </value>
+        [DataMember]
         public int ToDoId { get; set; }
 
 
@@ -22,6 +25,7 @@ namespace ToDoClient.Models
         /// <value>
         /// The user identifier.
         /// </value>
+        [DataMember]
         public int UserId { get; set; }
 
         /// <summary>
@@ -30,6 +34,7 @@ namespace ToDoClient.Models
         /// <value>
         /// <c>true</c> if this todo-item is completed; otherwise, <c>false</c>.
         /// </value>
+        [DataMember]
         public bool IsCompleted { get; set; }
 
         /// <summary>
@@ -38,6 +43,7 @@ namespace ToDoClient.Models
         /// <value>
         /// The name.
         /// </value>
+        [DataMember]
         public string Name { get; set; }
     }
 }
