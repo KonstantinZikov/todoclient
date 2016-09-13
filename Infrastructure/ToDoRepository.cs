@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -114,7 +115,20 @@ namespace ToDoClient.Infrastructure
 
             using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Read))
             {
-                result = (RepositoryInfo) serializer.ReadObject(stream);
+                try
+                {
+                    result = serializer.ReadObject(stream) as RepositoryInfo ?? new RepositoryInfo();
+                }
+                catch (SerializationException ex)
+                {
+                    result = new RepositoryInfo()
+                    {
+                        CreateIndexes = new List<int>(),
+                        UpdateIndexes = new List<int>(),
+                        DeleteIndexes = new List<int>(),
+                        ToDoItems = new List<ToDoItemViewModel>()
+                    };
+                }
             }
             Task.Factory.StartNew(() =>
             {

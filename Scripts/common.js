@@ -17,9 +17,9 @@ $(function () {
             success: function (todos) {
                 todos.forEach(function (item, index, array) {
                     $newLine = $(".todo-block .template-value").clone();
-                    $newLine.removeClass("template");
-                    $newLine.find("todo-name").text(item.Name);
-                    $newLine.attr("data-id", item.ToDoId);
+                    $newLine.removeClass("template-value");
+                    $newLine.find(".todo-name").text(item.Name);
+                    $newLine.attr("data-id", index);
                     $newLine.find("input:checkbox").prop("checked", item.IsCompleted);                  
                     $(".todo-block").prepend($newLine);
                     bindActions($newLine);
@@ -46,7 +46,7 @@ $(function () {
 
             var id = +$line.attr("data-id");
             var isCompleted = $line.find("input:checked") > 0;
-            if (id == 0) {
+            if (id == -1) {
                 var method = "POST";
             }
             else {
