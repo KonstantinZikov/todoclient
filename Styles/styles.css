@@ -139,7 +139,7 @@ header>.info{
     transition:background-color 200ms;
 }
 .button-container>div:hover{
-    background-color:#9dd8ff;
+    background-color:rgb(194,91,86);
     transition:background-color 200ms;
 }
 

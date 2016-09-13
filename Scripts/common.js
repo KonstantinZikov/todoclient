@@ -88,11 +88,37 @@ function deleteClick() {
     });
 }
 
-// Search delete- and edit-buttons in element (it should be .todo-value element)
+// On click to checkbox
+function checked() {
+    var $this = $(this);
+    $line = $this.parent();
+    if ($line.attr("data-id") != "-1") {
+        var $input = $line.find(".todo-input");
+        if ($input.length != 0) {
+            var name = $input.val();
+        }
+        else {
+            name = $line.find(".todo-name").text();
+        }
+
+        var id = +$line.attr("data-id");
+        var isCompleted = $this.prop("checked");
+
+        var entity = {
+            ToDoId: id,
+            IsCompleted: isCompleted,
+            Name: name
+        }
+        server.update(entity);
+    }    
+}
+
+// Search action elements in selected element (it should be .todo-value element)
 // and binds actions to them
 function bindActions(element) {
     element.find(".delete-button").on("click", deleteClick);
     element.find(".edit-button").on("click", editClick);
+    element.find(".checkbox").on("click", checked);
 }
 
 // Binds add-new-todo logic to Add button
