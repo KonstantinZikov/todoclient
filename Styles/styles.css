@@ -1,0 +1,155 @@
+*{
+    margin:0;
+    padding:0;
+    font-family:'Open sans',arial;
+}
+
+.content{
+    min-height: calc(100vh - 40px); 
+    width:100%; 
+    overflow:hidden; 
+    background-color:rgb(190,185,181);
+}
+
+footer{ 
+    text-transform:uppercase; 
+    background-color:rgb(194,91,86); 
+    overflow:hidden;   
+    height:10px;  
+    color:black;
+    padding:15px; 
+    font-size:10px; 
+} 
+
+header{
+    text-transform:uppercase; 
+    background-color:rgb(123,93,59); 
+    overflow:hidden;   
+    background-image:url("../Images/header-bg.jpg");
+    background-position: -400px -400px;
+    color:white;
+    font-weight:bold;
+    font-size:20px; 
+}
+
+header>.title{
+    background-color:rgba(60, 60, 60,0.5);
+    text-align:center;
+    font-size:40px;
+    padding-top:20px;
+}
+
+header>.info{
+    background-color:rgba(60, 60, 60,0.5);
+    padding:20px;
+    font-size:20px;
+    height:200px;  
+}
+
+@media screen and (max-width:800px){
+    header{
+        height:80px;
+        padding:0;
+    }
+}
+
+.block{
+    margin:20px 10% 20px 10%;
+    width:80%;
+    background-color:rgb(254,246,235); 
+}
+
+.control-block{
+    overflow:hidden;
+}
+
+.control-block>div{
+    margin:10px 0 10px 20px;
+    padding:8px;
+    background-color:rgb(194,91,86);
+    float:left;
+    cursor:pointer;
+    transition:background-color 200ms;
+    font-weight:bold;
+    color:white;
+}
+.control-block>div:hover{
+    background-color:#9dd8ff;
+    transition:background-color 200ms;
+}
+
+.todo-block{
+   
+}
+
+.todo-block>:nth-child(2n+1){
+   background-color:rgb(150,192,206);
+}
+.todo-block>:nth-child(2n){
+   background-color:rgb(190,222,246);
+}
+
+.todo-input{
+    display:block;
+    float:left;
+    padding:4px;
+    font-size:16px;
+    font-weight:bold;
+    margin:5px;
+}
+
+.todo-value{
+    padding:5px;
+    background-color:red;
+    overflow:hidden;
+}
+
+.checkbox{
+    display:block;
+    float:left;
+    margin:15px 5px 10px 5px;
+}
+
+.todo-name{
+    display:block;
+    float:left;
+    margin:10px;
+    font-weight:bold;
+}
+
+.button-container{
+    float:right;
+}
+
+.button-container>div{
+    text-align:center;
+    width:60px;
+    font-weight:bold;
+    display:block;
+    float:left;
+    margin:5px;
+    background-color:rgb(82,85,100);
+    color:white;
+    padding:8px;
+    cursor:pointer;
+    transition:background-color 200ms;
+}
+.button-container>div:hover{
+    background-color:#9dd8ff;
+    transition:background-color 200ms;
+}
+
+.edit-button{
+    
+}
+
+.delete-button{
+}
+
+.template{
+    display:none;
+}
+
+.template-value{
+    display:none;
+}

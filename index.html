@@ -1,32 +1,43 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-    <title>ToDo list</title>
-    <meta charset="utf-8"/>
+    <link href="http://allfont.ru/allfont.css?fonts=open-sans" rel="stylesheet" type="text/css" />
+    <link href="Styles/styles.css" type="text/css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script type="text/javascript" src="Scripts/taskManager.js"></script>
+    <script type="text/javascript" src="Scripts/common.js"></script>
     
-    <link rel="stylesheet" type="text/css" href="Styles/site.css">
-
-    <script src="Scripts/jquery-3.1.0.js" language="javascript"></script>
-    <script src="Scripts/todo.js" language="javascript"></script>
 </head>
-<body>
-    <table id="tasks">
-        <thead>
-            <tr>
-                <th>Completed</th>
-                <th>Task</th>
-                <th>Actions</th>
-            </tr>
-            <!-- The row for creating new items. -->
-            <tr id="new">
-                <td><input type='checkbox' id="newCompleted" /></td>
-                <td><input type='text' id="newName" /></td>
-                <td><input type='button' id="newCreate" value='Create' /></td>
-            </tr>
-        </thead>
-        <tbody>
-            
-        </tbody>
-    </table>
+<body>   
+    <div class="content">
+        <header>
+            <div class="title">Todo Super Application</div>
+            <div class="info">The best solution, if you have troubles with memory!</div>  
+        </header>
+        <div class="control-block block">
+            <div class="add-button">Add ToDo</div>
+        </div>
+        <div  class="todo-block block">
+            <form data-id="0" class="template todo-value" data-edit="true">
+                <input type="checkbox" class="checkbox"/>
+                <input class="todo-input" value="Todo name"/>
+                <div class="button-container">
+                    <div class="edit-button">Save</div>
+                    <div class="delete-button">Delete</div>
+                </div>          
+            </form>
+            <form data-id="0" class="template-value todo-value" data-edit="true">
+                <input type="checkbox" class="checkbox" />
+                <input class="todo-input" value="Todo name" />
+                <div class="button-container">
+                    <div class="edit-button">Save</div>
+                    <div class="delete-button">Delete</div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <footer>
+           Info about developers
+    </footer>
 </body>
 </html>
