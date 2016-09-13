@@ -47,10 +47,10 @@ namespace ToDoClient.Controllers
         /// Creates a new todo-item.
         /// </summary>
         /// <param name="todo">The todo-item to create.</param>
-        public void Post(ToDoItemViewModel todo)
+        public int Post(ToDoItemViewModel todo)
         {
             todo.UserId = userService.GetOrCreateUser();
-            todoRepository.CreateItem(todo);
+            return todoRepository.CreateItem(todo);
         }
     }
 }

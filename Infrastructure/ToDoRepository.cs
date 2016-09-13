@@ -4,6 +4,8 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using ToDoClient.Models;
 using ToDoClient.Services;
@@ -32,35 +34,62 @@ namespace ToDoClient.Infrastructure
         public IList<ToDoItemViewModel> GetItems(int userId)
         {
             return todoItems.Where(x => x.UserId == userId).ToList();
-            //return todoService.GetItems(userId);
         }
 
         public  void UpdeteItem(ToDoItemViewModel todo)
         {
-            var index = FindItem(todo.ToDoId);
-            if(index != -1)
+            Task.Factory.StartNew(() =>
             {
-                todoItems[index].IsCompleted = todo.IsCompleted;
-                todoItems[index].Name = todo.Name;
-            }
-            //todoService.UpdateItem(todo);
+                while (createIndexes.Count != 0)
+                    Thread.Sleep(1000);
+                   
+                todoItems[todo.ToDoId].IsCompleted = todo.IsCompleted;
+                todoItems[todo.ToDoId].Name = todo.Name;
+                updateIndexes.Add(todoItems[todo.ToDoId].ToDoId);
+                Commit();
+
+                todoService.UpdateItem(todoItems[todo.ToDoId]);
+                updateIndexes.Clear();
+                Commit();
+            });
         }
 
         public  void DeleteItem(int id)
         {
-            var index = FindItem(id);
-            if (index != -1)
+            Task.Factory.StartNew(() =>
             {
-                todoItems.RemoveAt(index);
-            }
-            //todoService.DeleteItem(id);
+                while (createIndexes.Count != 0)
+                    Thread.Sleep(1000);
+                deleteIndexes.Add(todoItems[id].ToDoId);
+                todoItems.RemoveAt(id);
+                Commit();
+
+                todoService.DeleteItem(id);
+                deleteIndexes.Clear();
+                Commit();
+            });    
         }
 
-        public void CreateItem(ToDoItemViewModel todo)
+        public int CreateItem(ToDoItemViewModel todo)
         {
-            todo.ToDoId = todoItems.Count+1;
+            var index = todoItems.Count;
+            createIndexes.Add(todoItems.Count);
             todoItems.Add(todo);
-            //todoService.CreateItem(todo);
+
+            Task.Factory.StartNew(() => 
+            {
+                todoService.CreateItem(todo);
+                var serverTodos = todoService.GetItems(todo.UserId);
+                for (int i = 0; i < createIndexes.Count; i++)
+                {
+                    todoItems[createIndexes[i]].ToDoId = serverTodos[createIndexes[i]].ToDoId;
+                }
+                createIndexes.Clear();
+                Commit();
+            });
+
+            Commit();
+            return index;
         }
 
         private void Commit()
@@ -87,22 +116,43 @@ namespace ToDoClient.Infrastructure
             {
                 result = (RepositoryInfo) serializer.ReadObject(stream);
             }
+            Task.Factory.StartNew(() =>
+            {
+                for (int i = 0; i < result.CreateIndexes.Count; i++)
+                {
+                    todoService.CreateItem(result.ToDoItems[result.CreateIndexes[i]]);
+                }
+
+                for (int i = 0; i < result.UpdateIndexes.Count; i++)
+                {
+                    todoService.UpdateItem(result.ToDoItems[result.UpdateIndexes[i]]);
+                }
+
+                for (int i = 0; i < result.DeleteIndexes.Count; i++)
+                {
+                    todoService.DeleteItem(result.ToDoItems[result.DeleteIndexes[i]].ToDoId);
+                }
+                createIndexes.Clear();
+                updateIndexes.Clear();
+                deleteIndexes.Clear();
+                Commit();
+            });
 
             return result;          
         }
 
-        private int FindItem(int itemId)
-        {
-            var index = -1;
-            for (int i = 0; i < todoItems.Count; i++)
-            {
-                if (todoItems[i].ToDoId == itemId)
-                {
-                    index = i;
-                    break;
-                }
-            }
-            return index;
-        }
+        //private int FindItem(int itemId)
+        //{
+        //    var index = -1;
+        //    for (int i = 0; i < todoItems.Count; i++)
+        //    {
+        //        if (todoItems[i].ToDoId == itemId)
+        //        {
+        //            index = i;
+        //            break;
+        //        }
+        //    }
+        //    return index;
+        //}
     }
 }
