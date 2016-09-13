@@ -5,6 +5,7 @@
 }
 
 .content{
+    min-width:360px;
     min-height: calc(100vh - 40px); 
     width:100%; 
     overflow:hidden; 
@@ -12,6 +13,7 @@
 }
 
 footer{ 
+    min-width:360px;
     text-transform:uppercase; 
     background-color:rgb(194,91,86); 
     overflow:hidden;   
@@ -19,6 +21,9 @@ footer{
     color:black;
     padding:15px; 
     font-size:10px; 
+    color:white;
+    font-weight:bold;
+    text-align:center;
 } 
 
 header{
@@ -31,25 +36,31 @@ header{
     font-weight:bold;
     font-size:20px; 
 }
-
 header>.title{
     background-color:rgba(60, 60, 60,0.5);
     text-align:center;
     font-size:40px;
     padding-top:20px;
 }
-
 header>.info{
     background-color:rgba(60, 60, 60,0.5);
     padding:20px;
+    padding-top:20px;
     font-size:20px;
     height:200px;  
+    text-align:center;
 }
 
 @media screen and (max-width:800px){
     header{
         height:80px;
         padding:0;
+    }
+}
+
+@media screen and (max-width:550px){
+    header>.title{
+    font-size:26px;
     }
 }
 
@@ -62,7 +73,6 @@ header>.info{
 .control-block{
     overflow:hidden;
 }
-
 .control-block>div{
     margin:10px 0 10px 20px;
     padding:8px;
@@ -77,11 +87,6 @@ header>.info{
     background-color:#9dd8ff;
     transition:background-color 200ms;
 }
-
-.todo-block{
-   
-}
-
 .todo-block>:nth-child(2n+1){
    background-color:rgb(150,192,206);
 }
@@ -120,7 +125,6 @@ header>.info{
 .button-container{
     float:right;
 }
-
 .button-container>div{
     text-align:center;
     width:60px;
@@ -137,13 +141,6 @@ header>.info{
 .button-container>div:hover{
     background-color:#9dd8ff;
     transition:background-color 200ms;
-}
-
-.edit-button{
-    
-}
-
-.delete-button{
 }
 
 .template{
