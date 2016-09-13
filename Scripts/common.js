@@ -19,7 +19,7 @@ $(function () {
                     $newLine = $(".todo-block .template-value").clone();
                     $newLine.removeClass("template-value");
                     $newLine.find(".todo-name").text(item.Name);
-                    $newLine.attr("data-id", index);
+                    $newLine.attr("data-id", item.ToDoId);
                     $newLine.find("input:checkbox").prop("checked", item.IsCompleted);                  
                     $(".todo-block").prepend($newLine);
                     bindActions($newLine);
@@ -45,7 +45,7 @@ $(function () {
             $(this).text("Edit");
 
             var id = +$line.attr("data-id");
-            var isCompleted = $line.find("input:checked") > 0;
+            var isCompleted = $line.find(".checkbox").prop("checked");
             if (id == -1) {
                 var method = "POST";
             }

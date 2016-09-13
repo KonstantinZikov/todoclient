@@ -31,7 +31,7 @@ namespace ToDoClient.Controllers
         public void Put(ToDoItemViewModel todo)
         {
             todo.UserId = userService.GetOrCreateUser();
-            todoRepository.UpdeteItem(todo);
+            todoRepository.UpdateItem(todo);
         }
 
         /// <summary>

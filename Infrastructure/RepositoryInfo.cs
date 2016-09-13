@@ -8,12 +8,14 @@ namespace ToDoClient.Infrastructure
 {
     public class RepositoryInfo
     {
-        public List<int> UpdateIndexes { get; set; }
+        public Dictionary<int, int> UpdateIndexes { get; set; }
 
-        public List<int> CreateIndexes { get; set; }
+        public Dictionary<int, int> CreateIndexes { get; set; }
 
-        public List<int> DeleteIndexes { get; set; }
+        public Dictionary<int, int> DeleteIndexes { get; set; }
 
-        public List<ToDoItemViewModel> ToDoItems { get; set; }
+        public Dictionary<int, ToDoItemViewModel> ToDoItems { get; set; }
+
+        public int NextId { get; set; }
     }
 }

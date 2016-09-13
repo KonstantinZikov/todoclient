@@ -16,12 +16,13 @@ namespace ToDoClient.Infrastructure
     public class ToDoRepository
     {
         private readonly ToDoService todoService = new ToDoService();
-        private readonly List<ToDoItemViewModel> todoItems = new List<ToDoItemViewModel>();
+        private readonly Dictionary<int,ToDoItemViewModel> todoItems = new Dictionary<int, ToDoItemViewModel>();
         private readonly string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
             "App_Data", ConfigurationManager.AppSettings["LocalStorageName"]);
-        private readonly List<int> updateIndexes = new List<int>();
-        private readonly List<int> createIndexes = new List<int>();
-        private readonly List<int> deleteIndexes = new List<int>();
+        private readonly Dictionary<int, int> updateIndexes = new Dictionary<int, int>();
+        private readonly Dictionary<int, int> createIndexes = new Dictionary<int, int>();
+        private readonly Dictionary<int, int> deleteIndexes = new Dictionary<int, int>();
+        private int nextId;
 
         public ToDoRepository()
         {
@@ -30,14 +31,28 @@ namespace ToDoClient.Infrastructure
             createIndexes = repositoryInfo.CreateIndexes;
             updateIndexes = repositoryInfo.UpdateIndexes;
             deleteIndexes = repositoryInfo.DeleteIndexes;
+            nextId = repositoryInfo.NextId;
         }
 
         public IList<ToDoItemViewModel> GetItems(int userId)
         {
-            return todoItems.Where(x => x.UserId == userId).ToList();
+            var result = new List<ToDoItemViewModel>();
+            foreach(var pair in todoItems)
+            {
+                if (!deleteIndexes.Keys.Contains(pair.Key) && pair.Value.UserId == userId){
+                    result.Add(new ToDoItemViewModel()
+                    {
+                        ToDoId = pair.Key,
+                        IsCompleted = pair.Value.IsCompleted,
+                        Name = pair.Value.Name,
+                        UserId = pair.Value.UserId
+                    });
+                }
+            }
+            return result;
         }
 
-        public  void UpdeteItem(ToDoItemViewModel todo)
+        public void UpdateItem(ToDoItemViewModel todo)
         {
             Task.Factory.StartNew(() =>
             {
@@ -46,46 +61,46 @@ namespace ToDoClient.Infrastructure
                    
                 todoItems[todo.ToDoId].IsCompleted = todo.IsCompleted;
                 todoItems[todo.ToDoId].Name = todo.Name;
-                updateIndexes.Add(todoItems[todo.ToDoId].ToDoId);
+                updateIndexes.Add(todo.ToDoId, todo.ToDoId);
                 Commit();
 
                 todoService.UpdateItem(todoItems[todo.ToDoId]);
-                updateIndexes.Clear();
+                updateIndexes.Remove(todo.ToDoId);
                 Commit();
             });
         }
 
-        public  void DeleteItem(int id)
+        public void DeleteItem(int id)
         {
             Task.Factory.StartNew(() =>
             {
-                while (createIndexes.Count != 0)
-                    Thread.Sleep(1000);
-                deleteIndexes.Add(todoItems[id].ToDoId);
-                todoItems.RemoveAt(id);
+                deleteIndexes.Add(id,id);           
                 Commit();
 
-                todoService.DeleteItem(id);
-                deleteIndexes.Clear();
+                while (createIndexes.Count != 0)
+                    Thread.Sleep(1000);
+                
+                todoService.DeleteItem(todoItems[id].ToDoId);
+                todoItems.Remove(id);
+
+                deleteIndexes.Remove(id);
                 Commit();
             });    
         }
 
         public int CreateItem(ToDoItemViewModel todo)
         {
-            var index = todoItems.Count;
-            createIndexes.Add(todoItems.Count);
-            todoItems.Add(todo);
+            var index = nextId++;
+            createIndexes.Add(index,index);
+            todoItems.Add(index,todo);
 
             Task.Factory.StartNew(() => 
             {
                 todoService.CreateItem(todo);
                 var serverTodos = todoService.GetItems(todo.UserId);
-                for (int i = 0; i < createIndexes.Count; i++)
-                {
-                    todoItems[createIndexes[i]].ToDoId = serverTodos[createIndexes[i]].ToDoId;
-                }
-                createIndexes.Clear();
+                var last = serverTodos.Last();
+                todoItems[index].ToDoId = last.ToDoId;
+                createIndexes.Remove(index);
                 Commit();
             });
 
@@ -115,19 +130,20 @@ namespace ToDoClient.Infrastructure
 
             using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Read))
             {
-                try
-                {
-                    result = serializer.ReadObject(stream) as RepositoryInfo ?? new RepositoryInfo();
-                }
-                catch (SerializationException ex)
+                if (new FileInfo(path).Length == 0)
                 {
                     result = new RepositoryInfo()
                     {
-                        CreateIndexes = new List<int>(),
-                        UpdateIndexes = new List<int>(),
-                        DeleteIndexes = new List<int>(),
-                        ToDoItems = new List<ToDoItemViewModel>()
+                        CreateIndexes = new Dictionary<int, int>(),
+                        UpdateIndexes = new Dictionary<int, int>(),
+                        DeleteIndexes = new Dictionary<int, int>(),
+                        ToDoItems = new Dictionary<int, ToDoItemViewModel>(),
+                        NextId = 1
                     };
+                }
+                else
+                {
+                    result = serializer.ReadObject(stream) as RepositoryInfo ?? new RepositoryInfo();
                 }
             }
             Task.Factory.StartNew(() =>
@@ -154,19 +170,5 @@ namespace ToDoClient.Infrastructure
 
             return result;          
         }
-
-        //private int FindItem(int itemId)
-        //{
-        //    var index = -1;
-        //    for (int i = 0; i < todoItems.Count; i++)
-        //    {
-        //        if (todoItems[i].ToDoId == itemId)
-        //        {
-        //            index = i;
-        //            break;
-        //        }
-        //    }
-        //    return index;
-        //}
     }
 }
