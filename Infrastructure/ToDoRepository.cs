@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using ToDoClient.Models;
 using ToDoClient.Services;
 
@@ -23,6 +21,9 @@ namespace ToDoClient.Infrastructure
         private readonly Dictionary<int, int> createIndexes = new Dictionary<int, int>();
         private readonly Dictionary<int, int> deleteIndexes = new Dictionary<int, int>();
         private int nextId;
+
+        private object commitLock = new object();
+        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(RepositoryInfo));
 
         public ToDoRepository()
         {
@@ -56,16 +57,19 @@ namespace ToDoClient.Infrastructure
         {
             Task.Factory.StartNew(() =>
             {
-                while (createIndexes.Count != 0)
-                    Thread.Sleep(1000);
-                   
-                todoItems[todo.ToDoId].IsCompleted = todo.IsCompleted;
-                todoItems[todo.ToDoId].Name = todo.Name;
-                updateIndexes.Add(todo.ToDoId, todo.ToDoId);
+                lock (commitLock)
+                {
+                    todoItems[todo.ToDoId].IsCompleted = todo.IsCompleted;
+                    todoItems[todo.ToDoId].Name = todo.Name;
+                    updateIndexes.Add(todo.ToDoId, todo.ToDoId);
+                }                       
                 Commit();
 
+                while (todoItems[todo.ToDoId].ToDoId == -1)
+                    Thread.Sleep(1000);
+
                 todoService.UpdateItem(todoItems[todo.ToDoId]);
-                updateIndexes.Remove(todo.ToDoId);
+                lock (commitLock) updateIndexes.Remove(todo.ToDoId);
                 Commit();
             });
         }
@@ -74,16 +78,18 @@ namespace ToDoClient.Infrastructure
         {
             Task.Factory.StartNew(() =>
             {
-                deleteIndexes.Add(id,id);           
+                lock (commitLock) deleteIndexes.Add(id,id);           
                 Commit();
 
-                while (createIndexes.Count != 0)
+                while (todoItems[id].ToDoId == -1)
                     Thread.Sleep(1000);
                 
                 todoService.DeleteItem(todoItems[id].ToDoId);
-                todoItems.Remove(id);
-
-                deleteIndexes.Remove(id);
+                lock (commitLock)
+                {
+                    todoItems.Remove(id);
+                    deleteIndexes.Remove(id);
+                }
                 Commit();
             });    
         }
@@ -91,16 +97,42 @@ namespace ToDoClient.Infrastructure
         public int CreateItem(ToDoItemViewModel todo)
         {
             var index = nextId++;
-            createIndexes.Add(index,index);
-            todoItems.Add(index,todo);
-
+            lock (commitLock)
+            {
+                createIndexes.Add(index, index);
+                todoItems.Add(index, todo);
+            }         
             Task.Factory.StartNew(() => 
             {
-                todoService.CreateItem(todo);
+                var sendingTodo = new ToDoItemViewModel()
+                {
+                    ToDoId = -1,
+                    IsCompleted = todo.IsCompleted,
+                    UserId = todo.UserId,
+                    Name = index + ":" + todo.Name
+                };
+                todoService.CreateItem(sendingTodo);
                 var serverTodos = todoService.GetItems(todo.UserId);
-                var last = serverTodos.Last();
-                todoItems[index].ToDoId = last.ToDoId;
-                createIndexes.Remove(index);
+                // It is more probably, that the value will be at the end.
+                for (int i = serverTodos.Count-1; i >= 0; i--)
+                {
+                    var parts = serverTodos[i].Name.Split(':');
+                    if (parts.Length > 1)
+                    {
+                        int id;
+                        if (int.TryParse(parts[0],out id))
+                        {
+                            if (id == index)
+                            {
+                                sendingTodo.ToDoId = serverTodos[i].ToDoId;
+                                break;
+                            }       
+                        }
+                    }
+                }
+                lock (commitLock) createIndexes.Remove(index);
+                todoService.UpdateItem(sendingTodo);
+                lock (commitLock) todo.ToDoId = sendingTodo.ToDoId;              
                 Commit();
             });
 
@@ -109,23 +141,24 @@ namespace ToDoClient.Infrastructure
         }
 
         private void Commit()
-        {
-            var serializer = new DataContractJsonSerializer(typeof(RepositoryInfo));
-            
-            using (var stream = File.Create(path))
+        {            
+            lock (commitLock)
             {
-                serializer.WriteObject(stream, new RepositoryInfo() {
-                    ToDoItems = todoItems,
-                    CreateIndexes = createIndexes,
-                    UpdateIndexes = updateIndexes,
-                    DeleteIndexes = deleteIndexes
-                });
-            }
+                using (var stream = File.Create(path))
+                {
+                    serializer.WriteObject(stream, new RepositoryInfo()
+                    {
+                        ToDoItems = todoItems,
+                        CreateIndexes = createIndexes,
+                        UpdateIndexes = updateIndexes,
+                        DeleteIndexes = deleteIndexes
+                    });
+                }
+            }           
         }
 
         private RepositoryInfo RestoreToDoItems()
         {
-            var serializer = new DataContractJsonSerializer(typeof(RepositoryInfo));
             var result = default(RepositoryInfo);
 
             using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Read))
