@@ -3,8 +3,8 @@ using System.Threading;
 using System.Web.Http;
 using ToDoClient.Infrastructure;
 using ToDoClient.Infrastructure.Filters;
+using ToDoClient.Infrastructure.Interfaces;
 using ToDoClient.Models;
-using ToDoClient.Services;
 
 namespace ToDoClient.Controllers
 {
@@ -14,13 +14,20 @@ namespace ToDoClient.Controllers
     /// <returns>The list of todo-items.</returns>
     public class SyncController : ApiController
     {
-        public readonly UserService userService = new UserService();
+        private readonly IUserService userService;
+        private readonly IToDoRepository todoRepository;
+
+        public SyncController(IUserService userService, IToDoRepository todoRepository)
+        {
+            this.userService = userService;
+            this.todoRepository = todoRepository;
+        }
 
         [SyncNotAvailable]
         public IList<ToDoItemViewModel> Get()
         {
             var userId = userService.GetOrCreateUser();
-            return ToDosController.todoRepository.Sync(userId);
+            return todoRepository.Sync(userId);
         }
 
         public IList<ToDoItemViewModel> Wait()
@@ -28,7 +35,7 @@ namespace ToDoClient.Controllers
             while (ToDoRepository.IsSyncronizing)
                 Thread.Sleep(1000);
             var userId = userService.GetOrCreateUser();
-            return ToDosController.todoRepository.GetItems(userId);
+            return todoRepository.GetItems(userId);
         }
     }
 }

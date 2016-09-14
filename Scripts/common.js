@@ -177,11 +177,13 @@ function syncState(isSync) {
         $(".message").text("Synchronazing. Please, wait...");
         $(".close").hide();
         $(".hider").off();
+        $(".loading").show();
     }
     else {
         $(".modal-button").show();
         $(".message").text(syncDefaultText);
         $(".close").show();
+        $(".loading").hide();
         bindHiderAction();
     }
 }

@@ -10,6 +10,7 @@ namespace ToDoClient.Infrastructure.Interfaces
     public interface IToDoRepository
     {
         IList<ToDoItemViewModel> GetItems(int userId);
+        IList<ToDoItemViewModel> Sync(int userId);
         void UpdateItem(ToDoItemViewModel todo);
         void DeleteItem(int id);
         int CreateItem(ToDoItemViewModel todo);

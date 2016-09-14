@@ -241,6 +241,7 @@ header>.info{
 }
 
 .loading{
+    display:none;
     width: 100px;
     height: 100px;
     background: url('../Images/loading.gif') no-repeat;

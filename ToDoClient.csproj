@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
@@ -112,10 +111,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
+    <Content Include="Images\close.png" />
     <Content Include="Images\header-bg.jpg" />
     <Content Include="Images\loading.gif" />
     <Content Include="index.html" />
-    <Content Include="indexOld.html" />
     <Content Include="packages.config" />
     <None Include="Scripts\jquery-3.1.0.intellisense.js" />
     <Content Include="Scripts\ajax-manager.js" />
@@ -130,10 +129,12 @@
   <ItemGroup>
     <Compile Include="App_Start\NinjectWebCommon.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\SyncController.cs" />
     <Compile Include="Controllers\ToDosController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Infrastructure\FilterAttributes\SyncNotAvailableAttribute.cs" />
     <Compile Include="Infrastructure\Interfaces\IToDoRepository.cs" />
     <Compile Include="Infrastructure\Interfaces\IToDoService.cs" />
     <Compile Include="Infrastructure\Interfaces\IUserService.cs" />
