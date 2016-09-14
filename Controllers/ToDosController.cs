@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+using ToDoClient.Models;
+using ToDoClient.Services;
+using System.Collections.Generic;
 using System.Web.Http;
 using ToDoClient.Infrastructure;
 using ToDoClient.Infrastructure.Interfaces;
+using ToDoClient.Infrastructure.Filters;
 using ToDoClient.Models;
 using ToDoClient.Services;
 
@@ -25,6 +28,7 @@ namespace ToDoClient.Controllers
         /// Returns all todo-items for the current user.
         /// </summary>
         /// <returns>The list of todo-items.</returns>
+        [SyncNotAvailable]
         public IList<ToDoItemViewModel> Get()
         {
             var userId = userService.GetOrCreateUser();
