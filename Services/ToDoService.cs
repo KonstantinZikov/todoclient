@@ -4,13 +4,14 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using ToDoClient.Models;
+using ToDoClient.Infrastructure.Interfaces;
 
 namespace ToDoClient.Services
 {
     /// <summary>
     /// Works with ToDo backend.
     /// </summary>
-    public class ToDoService
+    public class ToDoService: IToDoService
     {
         /// <summary>
         /// The service URL.

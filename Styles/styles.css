@@ -70,6 +70,14 @@ header>.info{
     background-color:rgb(254,246,235); 
 }
 
+.loading{
+    width: 100px;
+    height: 100px;
+    background: url('../Images/loading.gif') no-repeat;
+    background-size: cover;
+    margin: 5% auto 0;
+}
+
 .control-block{
     overflow:hidden;
 }

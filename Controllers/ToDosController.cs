@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Web.Http;
 using ToDoClient.Infrastructure;
+using ToDoClient.Infrastructure.Interfaces;
 using ToDoClient.Models;
 using ToDoClient.Services;
 
@@ -11,8 +12,14 @@ namespace ToDoClient.Controllers
     /// </summary>
     public class ToDosController : ApiController
     {
-        private readonly UserService userService = new UserService();
-        private static readonly ToDoRepository todoRepository = new ToDoRepository();
+        private readonly IUserService userService;
+        private readonly IToDoRepository todoRepository;
+
+        public ToDosController(IUserService userService, IToDoRepository todoRepository)
+        {
+            this.userService = userService;
+            this.todoRepository = todoRepository;
+        }
 
         /// <summary>
         /// Returns all todo-items for the current user.

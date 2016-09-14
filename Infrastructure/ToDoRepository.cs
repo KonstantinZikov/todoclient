@@ -6,14 +6,14 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using ToDoClient.Infrastructure.Interfaces;
 using ToDoClient.Models;
-using ToDoClient.Services;
 
 namespace ToDoClient.Infrastructure
 {
-    public class ToDoRepository
+    public class ToDoRepository: IToDoRepository
     {
-        private readonly ToDoService todoService = new ToDoService();
+        private readonly IToDoService todoService;
         private readonly Dictionary<int, ToDoItemViewModel> todoItems = new Dictionary<int, ToDoItemViewModel>();
         private readonly string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
             "App_Data", ConfigurationManager.AppSettings["LocalStorageName"]);
@@ -26,7 +26,7 @@ namespace ToDoClient.Infrastructure
         private object commitLock = new object();
         DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(RepositoryInfo));
 
-        public ToDoRepository()
+        public ToDoRepository(IToDoService todoService)
         {
             var repositoryInfo = RestoreToDoItems();
             todoItems = repositoryInfo.ToDoItems;
@@ -34,6 +34,7 @@ namespace ToDoClient.Infrastructure
             updateIndexes = repositoryInfo.UpdateIndexes;
             deleteIndexes = repositoryInfo.DeleteIndexes;
             nextId = repositoryInfo.NextId;
+            this.todoService = todoService;
         }
 
         public IList<ToDoItemViewModel> GetItems(int userId)

@@ -3,13 +3,14 @@ using System.Configuration;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web;
+using ToDoClient.Infrastructure.Interfaces;
 
 namespace ToDoClient.Services
 {
     /// <summary>
     /// Works with Users backend.
     /// </summary>
-    public class UserService
+    public class UserService: IUserService
     {
         /// <summary>
         /// The service URL.

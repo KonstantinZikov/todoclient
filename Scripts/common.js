@@ -1,3 +1,5 @@
+/// <reference path="jquery-3.1.0.js" />
+
 var server = new AjaxManager();
 
 // loads all values from server
