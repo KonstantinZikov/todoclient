@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Web.Http;
 using ToDoClient.Infrastructure;
+using ToDoClient.Infrastructure.Filters;
 using ToDoClient.Models;
 using ToDoClient.Services;
 
@@ -11,13 +12,14 @@ namespace ToDoClient.Controllers
     /// </summary>
     public class ToDosController : ApiController
     {
-        private readonly UserService userService = new UserService();
-        private static readonly ToDoRepository todoRepository = new ToDoRepository();
+        public readonly UserService userService = new UserService();
+        public static readonly ToDoRepository todoRepository = new ToDoRepository();
 
         /// <summary>
         /// Returns all todo-items for the current user.
         /// </summary>
         /// <returns>The list of todo-items.</returns>
+        [SyncNotAvailable]
         public IList<ToDoItemViewModel> Get()
         {
             var userId = userService.GetOrCreateUser();

@@ -1,18 +1,16 @@
 var server = new AjaxManager();
+var syncDefaultText = "";
 
-// loads all values from server
-function load() {
-    server.get(function (todos) {
-        todos.forEach(function (item, index, array) {
-            $newLine = $(".todo-block .template-value").clone();
-            $newLine.removeClass("template-value");
-            $newLine.find(".todo-name").text(item.Name);
-            $newLine.attr("data-id", item.ToDoId);
-            $newLine.find("input:checkbox").prop("checked", item.IsCompleted);
-            $(".todo-block").prepend($newLine);
-            bindActions($newLine);
-        });
-    })
+function showData(todos) {
+    todos.forEach(function (item, index, array) {
+        $newLine = $(".todo-block .template-value").clone();
+        $newLine.removeClass("template-value");
+        $newLine.find(".todo-name").text(item.Name);
+        $newLine.attr("data-id", item.ToDoId);
+        $newLine.find("input:checkbox").prop("checked", item.IsCompleted);
+        $(".todo-block").prepend($newLine);
+        bindActions($newLine);
+    });
 }
 
 // edit-/save-buttin action
@@ -133,8 +131,82 @@ function bindAddAction() {
     })
 }
 
-$(function () {
-    load();
+function bindModalAction() {
+    $(".sync-button").on("click", function () {
+        $(".hider").show(300);
+        $(".modal").show(300);
+    })
+}
+
+function bindHiderAction() {
+    $(".hider").on("click", function () {
+        $(".hider").hide(300);
+        $(".modal").hide(300);
+    })
+}
+
+function bindCloseAction() {
+    $(".close").on("click", function () {
+        $(".hider").hide(300);
+        $(".modal").hide(300);
+    })
+}
+
+function bindSyncAction() {
+    $(".modal-button").on("click", function () {
+        syncState(true);
+        server.sync(function (todos) {
+            $(".todo-value").each(function () {
+                $this = $(this);
+                if (!$this.hasClass("template") && !$this.hasClass("template-value")) {
+                    $this.remove();
+                }
+            })
+            showData(todos);
+            syncState(false);
+            $(".hider").hide(300);
+            $(".modal").hide(300);
+        });
+    })
+}
+
+function syncState(isSync) {
+    if (isSync) {
+        $(".modal-button").hide();
+        syncDefaultText = $(".message").text();
+        $(".message").text("Synchronazing. Please, wait...");
+        $(".close").hide();
+        $(".hider").off();
+    }
+    else {
+        $(".modal-button").show();
+        $(".message").text(syncDefaultText);
+        $(".close").show();
+        bindHiderAction();
+    }
+}
+
+$(function(){
+    server.get(function(todos){
+        if (todos!="Sync"){
+            showData(todos)
+        }
+        else {
+            syncState(true);
+            $(".hider").show(300);
+            $(".modal").show(300);
+            server.waitForSync(function (todos) {
+                showData(todos);
+                syncState(false);
+                $(".hider").hide(300);
+                $(".modal").hide(300);
+            });
+        }
+    });
     bindAddAction();
+    bindModalAction();
+    bindHiderAction();
+    bindCloseAction();
+    bindSyncAction();
     bindActions($(".todo-value"));
 })

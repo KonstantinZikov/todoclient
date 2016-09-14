@@ -24,8 +24,8 @@
     }
 
     // Gets all values from server and calls callback if success.
-    // @callback: function that calls if success and
-    // should have one param - collection of 'todo' entities.
+    // @callback: function that calls if success.
+    // Should have one param - collection of 'todo' entities.
     this.get = function (callback) {
         $.ajax({
             url: "/api/todos",
@@ -41,6 +41,27 @@
         $.ajax({
             url: "/api/todos/" + id,
             type: "DELETE"
+        });
+    }
+
+    // Try to synchronize server to service, returns todos and calls callback if success.
+    // @callback: function that calls if success.
+    // Should have one param - collection of 'todo' entities.
+    this.sync = function (callback) {
+        $.ajax({
+            url: "/api/sync",
+            type: "GET",
+            contentType: 'application/json',
+            success: callback
+        });
+    }
+
+    this.waitForSync = function (callback) {
+        $.ajax({
+            url: "/api/sync",
+            type: "POST",
+            contentType: 'application/json',
+            success: callback
         });
     }
 }

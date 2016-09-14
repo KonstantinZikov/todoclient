@@ -22,6 +22,7 @@ namespace ToDoClient.Infrastructure
         private readonly Dictionary<int, int> deleteIndexes = new Dictionary<int, int>();
         private int nextId;
         private int updateId = 1;
+        public static bool IsSyncronizing;
 
         private object commitLock = new object();
         DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(RepositoryInfo));
@@ -53,6 +54,52 @@ namespace ToDoClient.Infrastructure
                 }
             }
             return result;
+        }
+
+        public IList<ToDoItemViewModel> Sync(int userId)
+        {
+            IsSyncronizing = true;
+            try
+            {
+                var serverData = todoService.GetItems(userId);
+                var localData = todoItems.Values;
+                var deleteList = new List<int>();
+                var addList = new List<ToDoItemViewModel>();
+                // search new data from service
+                foreach (var todo in serverData)
+                {
+                    if (localData.FirstOrDefault((t) => t.ToDoId == todo.ToDoId)
+                        == default(ToDoItemViewModel))
+                    {
+                        addList.Add(todo);
+                    }
+                }
+                // search data 
+                foreach (var pair in todoItems)
+                {
+                    if (serverData.FirstOrDefault((t) => t.ToDoId == pair.Value.ToDoId)
+                        == default(ToDoItemViewModel))
+                    {
+                        deleteList.Add(pair.Key);
+                    }
+                }
+
+                foreach (var key in deleteList)
+                {
+                    todoItems.Remove(key);
+                }
+                foreach (var todo in addList)
+                {
+                    todo.Name = todo.Name.Trim();
+                    todoItems.Add(nextId++, todo);
+                }
+                Commit();
+                return GetItems(userId);
+            }
+            finally
+            {
+                IsSyncronizing = false;
+            }
         }
 
         public void UpdateItem(ToDoItemViewModel todo)
@@ -134,9 +181,12 @@ namespace ToDoClient.Infrastructure
                         }
                     }
                 }
-                lock (commitLock) createIndexes.Remove(index);
-                todoService.UpdateItem(sendingTodo);
-                lock (commitLock) todo.ToDoId = sendingTodo.ToDoId;
+                lock (commitLock)
+                {
+                    createIndexes.Remove(index);
+                    todo.ToDoId = sendingTodo.ToDoId;
+                }
+                todoService.UpdateItem(todo);               
                 Commit();
             });
 
