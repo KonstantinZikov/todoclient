@@ -17,5 +17,7 @@ namespace ToDoClient.Infrastructure
         public Dictionary<int, ToDoItemViewModel> ToDoItems { get; set; }
 
         public int NextId { get; set; }
+
+        public int UpdateId { get; set; }
     }
 }

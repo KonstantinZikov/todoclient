@@ -22,7 +22,7 @@ namespace ToDoClient.Infrastructure
         private readonly Dictionary<int, int> deleteIndexes = new Dictionary<int, int>();
         private int nextId;
         private int updateId = 1;
-		public static bool IsSyncronizing;
+		public static bool IsSyncronizing { get; set; }
 
         private object commitLock = new object();
         DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(RepositoryInfo));
@@ -35,6 +35,7 @@ namespace ToDoClient.Infrastructure
             updateIndexes = repositoryInfo.UpdateIndexes;
             deleteIndexes = repositoryInfo.DeleteIndexes;
             nextId = repositoryInfo.NextId;
+            updateId = repositoryInfo.UpdateId;
             this.todoService = todoService;
         }
 
@@ -208,7 +209,9 @@ namespace ToDoClient.Infrastructure
                         ToDoItems = todoItems,
                         CreateIndexes = createIndexes,
                         UpdateIndexes = updateIndexes,
-                        DeleteIndexes = deleteIndexes
+                        DeleteIndexes = deleteIndexes,
+                        NextId = nextId,
+                        UpdateId = updateId
                     });
                 }
             }
